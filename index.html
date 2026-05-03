@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>روشنائی — ایک ذاتی بلاگ</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        oklch(97% 0.010 80);
+      --ink:       oklch(16% 0.010 60);
+      --ink-muted: oklch(48% 0.010 60);
+      --accent:    oklch(56% 0.095 10);
+      --rule:      oklch(84% 0.010 70);
+      --font-urdu: 'Noto Nastaliq Urdu', serif;
+      --font-en:   'EB Garamond', Georgia, serif;
+    }
+
+    [data-theme="dark"] {
+      --bg:        oklch(12% 0.010 60);
+      --ink:       oklch(92% 0.008 70);
+      --ink-muted: oklch(58% 0.008 70);
+      --rule:      oklch(22% 0.010 60);
+    }
+
+    html {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font-urdu);
+      font-size: 18px;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body { min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+
+    /* ── Theme Toggle ── */
+    .theme-toggle {
+      position: fixed;
+      top: 24px;
+      left: 24px;
+      z-index: 100;
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--rule);
+      border-radius: 50%;
+      background: var(--bg);
+      color: var(--ink-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s, color 0.2s, background 0.3s;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .theme-toggle .icon-sun,
+    .theme-toggle .icon-moon { display: none; }
+
+    [data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+    [data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
+    :root:not([data-theme="dark"]) .theme-toggle .icon-moon,
+    html:not([data-theme]) .theme-toggle .icon-moon { display: block; }
+    :root:not([data-theme="dark"]) .theme-toggle .icon-sun,
+    html:not([data-theme]) .theme-toggle .icon-sun { display: none; }
+
+    /* ── Header ── */
+    .site-header {
+      padding: 56px 0 44px;
+      border-bottom: 1px solid var(--rule);
+      text-align: center;
+      animation: fadeUp 0.7s ease both;
+    }
+
+    .site-name {
+      font-family: var(--font-urdu);
+      font-size: clamp(3.4rem, 9vw, 5.6rem);
+      font-weight: 700;
+      line-height: 1.5;
+      color: var(--ink);
+    }
+
+    .site-name-en {
+      font-family: var(--font-en);
+      font-size: 0.88rem;
+      font-style: italic;
+      color: var(--ink-muted);
+      letter-spacing: 0.14em;
+      display: block;
+      margin-top: 4px;
+    }
+
+    .site-tagline {
+      font-family: var(--font-urdu);
+      font-size: 1rem;
+      line-height: 2.2;
+      color: var(--ink-muted);
+      margin-top: 16px;
+    }
+
+    .site-nav {
+      display: flex;
+      justify-content: center;
+      gap: 36px;
+      margin-top: 26px;
+      font-family: var(--font-en);
+      font-size: 0.75rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+
+    .site-nav a { transition: color 0.2s; }
+    .site-nav a:hover { color: var(--accent); }
+
+    /* ── Section divider ── */
+    .section-label {
+      font-family: var(--font-en);
+      font-size: 0.68rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin: 56px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      opacity: 0.7;
+    }
+
+    .section-label::before,
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--rule);
+    }
+
+    /* ── Post list ── */
+    .post-list {
+      list-style: none;
+      margin-top: 0;
+    }
+
+    .post-item {
+      border-bottom: 1px solid var(--rule);
+      padding: 38px 0;
+      cursor: pointer;
+    }
+
+    .post-item:first-of-type {
+      border-top: 1px solid var(--rule);
+      margin-top: 28px;
+    }
+
+    .post-item-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: transform 0.28s cubic-bezier(.4,0,.2,1);
+    }
+
+    .post-item:hover .post-item-inner {
+      transform: translateX(-7px);
+    }
+
+    .post-meta {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .post-date {
+      font-family: var(--font-urdu);
+      font-size: 0.8rem;
+      color: var(--ink-muted);
+      line-height: 2;
+    }
+
+    .post-dot {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--rule);
+      flex-shrink: 0;
+    }
+
+    .post-read-time {
+      font-family: var(--font-urdu);
+      font-size: 0.78rem;
+      color: var(--accent);
+      line-height: 2;
+    }
+
+    .post-title {
+      font-family: var(--font-urdu);
+      font-size: clamp(1.25rem, 2.6vw, 1.65rem);
+      font-weight: 600;
+      line-height: 1.95;
+      color: var(--ink);
+      transition: color 0.2s;
+    }
+
+    .post-item:hover .post-title { color: var(--accent); }
+
+    .post-excerpt {
+      font-family: var(--font-urdu);
+      font-size: 0.95rem;
+      line-height: 2.5;
+      color: var(--ink-muted);
+    }
+
+    .post-cta {
+      font-family: var(--font-en);
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      color: var(--ink-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 2px;
+      transition: color 0.2s, gap 0.2s;
+    }
+
+    .post-cta-arrow {
+      transition: transform 0.2s;
+      display: inline-block;
+    }
+
+    .post-item:hover .post-cta { color: var(--accent); gap: 9px; }
+    .post-item:hover .post-cta-arrow { transform: translateX(-3px); }
+
+    /* ── Featured badge ── */
+    .featured-pill {
+      display: inline-block;
+      font-family: var(--font-en);
+      font-size: 0.6rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 2px;
+      padding: 1px 6px;
+      vertical-align: middle;
+      margin-left: 10px;
+      opacity: 0.8;
+    }
+
+    /* ── Footer ── */
+    .site-footer {
+      margin-top: 80px;
+      padding: 44px 0 60px;
+      border-top: 1px solid var(--rule);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 22px;
+      animation: fadeUp 0.6s 0.5s ease both;
+      opacity: 0;
+      animation-fill-mode: forwards;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+
+    .footer-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-en);
+      font-size: 0.76rem;
+      letter-spacing: 0.1em;
+      color: var(--ink-muted);
+      transition: color 0.2s;
+    }
+
+    .footer-link:hover { color: var(--accent); }
+
+    .footer-link svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+      flex-shrink: 0;
+    }
+
+    .footer-copy {
+      font-family: var(--font-en);
+      font-size: 0.7rem;
+      color: var(--ink-muted);
+      letter-spacing: 0.06em;
+      opacity: 0.5;
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .post-item:nth-child(1) { animation: fadeUp 0.5s 0.10s ease both; }
+    .post-item:nth-child(2) { animation: fadeUp 0.5s 0.20s ease both; }
+    .post-item:nth-child(3) { animation: fadeUp 0.5s 0.30s ease both; }
+    .post-item:nth-child(4) { animation: fadeUp 0.5s 0.40s ease both; }
+    .post-item:nth-child(5) { animation: fadeUp 0.5s 0.50s ease both; }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      .container { padding: 0 20px; }
+      .site-header { padding: 44px 0 36px; }
+      .site-nav { gap: 24px; }
+      .footer-links { gap: 20px; flex-wrap: wrap; justify-content: center; }
+      .theme-toggle { top: 16px; left: 16px; width: 36px; height: 36px; font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Theme Toggle -->
+  <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+    <span class="icon-moon">☽</span>
+    <span class="icon-sun">☀</span>
+  </button>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="container">
+      <h1 class="site-name">روشنائی</h1>
+      <span class="site-name-en">Roshnai — a personal blog</span>
+      <p class="site-tagline">سوچوں کا گھر، الفاظ کا سفر</p>
+      <nav class="site-nav">
+        <a href="#">About</a>
+        <a href="#">Archive</a>
+        <a href="#">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- POSTS -->
+  <main>
+    <div class="container">
+      <div class="section-label">Latest Posts</div>
+      <ul class="post-list">
+
+        <li class="post-item">
+          <div class="post-item-inner">
+            <div class="post-meta">
+              <span class="post-date">۲۰ مئی ۲۰۲۵</span>
+              <span class="post-dot"></span>
+              <span class="post-read-time">۵ منٹ</span>
+            </div>
+            <h2 class="post-title">
+              <span class="featured-pill">منتخب</span>
+              خاموشی کی زبان — جب الفاظ ناکافی ہو جاتے ہیں
+            </h2>
+            <p class="post-excerpt">کبھی کبھی انسان اتنا کچھ محسوس کرتا ہے کہ الفاظ اس کا بوجھ اٹھانے سے قاصر ہو جاتے ہیں۔ خاموشی بھی ایک زبان ہے — شاید سب سے گہری اور سب سے سچی زبان۔</p>
+            <span class="post-cta">Read more <span class="post-cta-arrow">←</span></span>
+          </div>
+        </li>
+
+        <li class="post-item">
+          <div class="post-item-inner">
+            <div class="post-meta">
+              <span class="post-date">۱۲ مئی ۲۰۲۵</span>
+              <span class="post-dot"></span>
+              <span class="post-read-time">۷ منٹ</span>
+            </div>
+            <h2 class="post-title">پرانی کتابوں کی خوشبو اور یادوں کا سفر</h2>
+            <p class="post-excerpt">پرانی کتاب کھولنا ایک عجیب تجربہ ہے — اس کی خوشبو میں وقت کی گرد ہے، اور ہر صفحے میں کسی اور دور کی سانسیں محفوظ ہیں۔</p>
+            <span class="post-cta">Read more <span class="post-cta-arrow">←</span></span>
+          </div>
+        </li>
+
+        <li class="post-item">
+          <div class="post-item-inner">
+            <div class="post-meta">
+              <span class="post-date">۳ مئی ۲۰۲۵</span>
+              <span class="post-dot"></span>
+              <span class="post-read-time">۴ منٹ</span>
+            </div>
+            <h2 class="post-title">شہر کی رات اور ایک مسافر کی سوچیں</h2>
+            <p class="post-excerpt">رات کے سناٹے میں شہر ایک الگ چہرہ اختیار کر لیتا ہے۔ جب سڑکیں خالی ہوتی ہیں تو روشنیوں کی کہانیاں زیادہ بلند آواز سے بولتی ہیں۔</p>
+            <span class="post-cta">Read more <span class="post-cta-arrow">←</span></span>
+          </div>
+        </li>
+
+        <li class="post-item">
+          <div class="post-item-inner">
+            <div class="post-meta">
+              <span class="post-date">۲۵ اپریل ۲۰۲۵</span>
+              <span class="post-dot"></span>
+              <span class="post-read-time">۶ منٹ</span>
+            </div>
+            <h2 class="post-title">والدین کے ہاتھ — ایک نامکمل خاکہ</h2>
+            <p class="post-excerpt">ماں کے ہاتھوں کی لکیروں میں پوری زندگی لکھی ہوتی ہے۔ یہ ہاتھ جو کبھی تھپکی دیتے تھے، آج بھی وہی محبت رکھتے ہیں — بس وقت نے انہیں تھوڑا سا موڑ دیا ہے۔</p>
+            <span class="post-cta">Read more <span class="post-cta-arrow">←</span></span>
+          </div>
+        </li>
+
+        <li class="post-item">
+          <div class="post-item-inner">
+            <div class="post-meta">
+              <span class="post-date">۱۸ اپریل ۲۰۲۵</span>
+              <span class="post-dot"></span>
+              <span class="post-read-time">۳ منٹ</span>
+            </div>
+            <h2 class="post-title">بارش کے بعد کی مٹی اور ایک ادھوری نظم</h2>
+            <p class="post-excerpt">بارش کے بعد جب ہوا میں مٹی کی خوشبو گھل جاتی ہے تو دل میں کچھ الفاظ جنم لیتے ہیں — ادھورے، بے قافیہ، لیکن بالکل سچے۔</p>
+            <span class="post-cta">Read more <span class="post-cta-arrow">←</span></span>
+          </div>
+        </li>
+
+      </ul>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-links">
+      <a href="#" class="footer-link">
+        <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        Twitter / X
+      </a>
+      <a href="#" class="footer-link">
+        <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        Instagram
+      </a>
+      <a href="#" class="footer-link">
+        <svg viewBox="0 0 24 24"><path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19.01 7.38 20 6.18 20C4.98 20 4 19.01 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1z"/></svg>
+        RSS Feed
+      </a>
+    </div>
+    <p class="footer-copy">© ۲۰۲۵ روشنائی — جملہ حقوق محفوظ</p>
+  </footer>
+
+  <script>
+    const toggle = document.getElementById('theme-toggle');
+    const saved = localStorage.getItem('roshnai-theme');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+
+    toggle.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('roshnai-theme', next);
+    });
+  </script>
+
+</body>
+</html>
