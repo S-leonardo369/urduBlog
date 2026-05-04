@@ -53,9 +53,14 @@ export default config({
           publicPath: '/images/posts/',
         }),
 
-        content: fields.text({
+        content: fields.markdoc({
           label: 'تحریر',
-          multiline: true,
+          options: {
+            image: {
+              directory: 'public/images/posts',
+              publicPath: '/images/posts/',
+            },
+          },
         }),
       },
     }),
