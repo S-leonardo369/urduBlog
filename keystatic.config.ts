@@ -1,8 +1,8 @@
 import { config, collection, fields } from '@keystatic/core';
 
 // Update these two values to match your GitHub repo before deploying.
-const GITHUB_OWNER = 'YOUR_GITHUB_USERNAME';
-const GITHUB_REPO  = 'YOUR_REPO_NAME';
+const GITHUB_OWNER = 'D3VIL';
+const GITHUB_REPO  = 'roshnai-blog';
 
 export default config({
   storage: {
