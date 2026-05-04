@@ -12,7 +12,7 @@ interface Props {
   nextPost?: { title: string; date: Date; slug: string } | null;
 }
 
-const { title, description, category = 'تحریر', date, readTime = '۵ منٹ', author = 'Ahmad Raza', prevPost, nextPost } = Astro.props;
+const { title, description, category = 'تحریر', date, readTime = '۵ منٹ', author = 'Iftkhar Ali', prevPost, nextPost } = Astro.props;
 
 function formatUrduDate(d: Date) {
   const urduMonths = ['جنوری','فروری','مارچ','اپریل','مئی','جون','جولائی','اگست','ستمبر','اکتوبر','نومبر','دسمبر'];

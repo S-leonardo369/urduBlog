@@ -21,7 +21,7 @@ export default config({
       label: 'تحریریں',
       slugField: 'title',
       path: 'src/content/posts/*',
-      format: { contentField: 'content' },
+      format: { contentField: 'md' },
       entryLayout: 'content',
       schema: {
         title: fields.slug({
