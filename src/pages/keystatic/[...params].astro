@@ -1,0 +1,100 @@
+---
+// This file overrides @keystatic/astro's auto-injected route so we can add
+// RTL + Noto Nastaliq Urdu CSS to the admin editor without touching public pages.
+export const prerender = false;
+
+import KeystaticApp from '../../components/KeystaticApp';
+---
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>روشنائی — Admin</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    /* ─────────────────────────────────────────────────────────────────
+       URDU EDITOR OVERRIDES
+       Scope: /keystatic/* only. Does not affect the public blog.
+
+       Targets:
+         .ProseMirror          — the contenteditable area (markdoc field)
+         [data-keystatic-editor] — Keystatic's wrapper div around ProseMirror
+         textarea              — multiline text fields (description, etc.)
+         input[type="text"]    — single-line fields (title, tags, etc.)
+
+       We do NOT flip the whole admin UI to RTL — only the editable fields —
+       so Keystatic's navigation, sidebar, and buttons stay LTR/readable.
+    ───────────────────────────────────────────────────────────────── */
+
+    /* Main markdoc / document content editor */
+    .ProseMirror {
+      direction: rtl !important;
+      font-family: 'Noto Nastaliq Urdu', serif !important;
+      font-size: 18px !important;
+      line-height: 2.2 !important;
+      text-align: right !important;
+    }
+
+    /* Keystatic's outer wrapper for the editor */
+    [data-keystatic-editor] {
+      direction: rtl !important;
+    }
+
+    /* Paragraph, heading, blockquote nodes inside the editor */
+    .ProseMirror p,
+    .ProseMirror h1,
+    .ProseMirror h2,
+    .ProseMirror h3,
+    .ProseMirror blockquote,
+    .ProseMirror li {
+      font-family: 'Noto Nastaliq Urdu', serif !important;
+      direction: rtl !important;
+      text-align: right !important;
+      line-height: 2.2 !important;
+    }
+
+    /* Blockquote gets a right border to match blog style */
+    .ProseMirror blockquote {
+      border-right: 3px solid #b05040 !important;
+      border-left: none !important;
+      padding-right: 16px !important;
+      padding-left: 0 !important;
+    }
+
+    /* All textareas (description, multi-line text fields) */
+    textarea {
+      direction: rtl !important;
+      font-family: 'Noto Nastaliq Urdu', serif !important;
+      font-size: 18px !important;
+      line-height: 2.2 !important;
+      text-align: right !important;
+    }
+
+    /* Single-line text inputs (title, tag items) */
+    input[type="text"],
+    input:not([type]) {
+      direction: rtl !important;
+      font-family: 'Noto Nastaliq Urdu', serif !important;
+      font-size: 17px !important;
+      text-align: right !important;
+    }
+
+    /* Placeholder text should also be RTL */
+    ::placeholder {
+      direction: rtl;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <KeystaticApp client:only="react" />
+</body>
+</html>
