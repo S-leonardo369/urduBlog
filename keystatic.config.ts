@@ -1,13 +1,10 @@
 import { config, collection, fields } from '@keystatic/core';
 
-// Update these two values to match your GitHub repo before deploying.
 const GITHUB_OWNER = 'S-leonardo369';
 const GITHUB_REPO  = 'urduBlog';
 
 export default config({
   storage: {
-    // In dev, use local storage (no GitHub auth needed).
-    // On the deployed site, switch to 'github'.
     kind: import.meta.env.DEV ? 'local' : 'github',
     repo: { owner: GITHUB_OWNER, name: GITHUB_REPO },
   },
@@ -21,7 +18,7 @@ export default config({
       label: 'تحریریں',
       slugField: 'title',
       path: 'src/content/posts/*',
-      format: { contentField: 'md' },
+      format: { contentField: 'content' },
       entryLayout: 'content',
       schema: {
         title: fields.slug({
@@ -56,14 +53,9 @@ export default config({
           publicPath: '/images/posts/',
         }),
 
-        content: fields.markdoc({
+        content: fields.text({
           label: 'تحریر',
-          options: {
-            image: {
-              directory: 'public/images/posts',
-              publicPath: '/images/posts/',
-            },
-          },
+          multiline: true,
         }),
       },
     }),
