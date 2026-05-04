@@ -1,10 +1,17 @@
 // Custom Keystatic API route that fixes the OAuth redirect_uri on Vercel.
 //
 // Root cause: Keystatic builds redirect_uri from new URL(req.url).origin.
-// On Vercel serverless, req.url contains an internal "localhost" origin;
-// the real public domain is only in x-forwarded-host / x-forwarded-proto.
-// This wrapper rewrites the request URL to the real origin before Keystatic
-// ever sees it, so the redirect_uri it sends to GitHub is correct.
+// On Vercel serverless, req.url often contains an internal "localhost" origin;
+// the real public domain has to come from env vars or forwarded headers.
+//
+// Priority chain (first match wins):
+//   1. process.env.KEYSTATIC_URL              — explicit, user-controlled
+//   2. process.env.VERCEL_PROJECT_PRODUCTION_URL — auto-set by Vercel on every
+//                                                 deployment (no setup needed)
+//   3. x-forwarded-host header                — generic platform fallback
+//
+// We use process.env (runtime) instead of import.meta.env (build-time) so
+// env vars added in the Vercel dashboard after the build still work.
 export const prerender = false;
 
 import { makeHandler } from '@keystatic/astro/api';
@@ -14,7 +21,6 @@ const _handler = makeHandler({ config: keystaticConfig });
 
 export const ALL = async (context: Parameters<typeof _handler>[0]) => {
   const fixed = withPublicOrigin(context.request);
-  // Proxy the context so every property is unchanged except `request`.
   const patchedContext = new Proxy(context, {
     get(target, prop) {
       if (prop === 'request') return fixed;
@@ -24,25 +30,38 @@ export const ALL = async (context: Parameters<typeof _handler>[0]) => {
   return _handler(patchedContext);
 };
 
-function withPublicOrigin(request: Request): Request {
-  // 1. Explicit env var override (most reliable — set KEYSTATIC_URL on Vercel)
-  const explicit = import.meta.env.KEYSTATIC_URL as string | undefined;
+function getPublicOrigin(request: Request): string | null {
+  const env = (typeof process !== 'undefined' && process.env) || {};
 
-  // 2. Vercel always sets these forwarded headers on the real edge request
+  // 1. User-provided override
+  const explicit = env.KEYSTATIC_URL;
+  if (explicit) return explicit.replace(/\/$/, '');
+
+  // 2. Vercel auto-populates this on every production + preview deployment
+  const vercelProd = env.VERCEL_PROJECT_PRODUCTION_URL;
+  if (vercelProd) return `https://${vercelProd.replace(/^https?:\/\//, '').replace(/\/$/, '')}`;
+
+  // 3. Generic x-forwarded-host fallback (skip localhost values)
   const fwdHost  = request.headers.get('x-forwarded-host');
   const fwdProto = request.headers.get('x-forwarded-proto') ?? 'https';
+  if (fwdHost) {
+    const host  = fwdHost.split(',')[0].trim();
+    const proto = fwdProto.split(',')[0].trim();
+    const isLocal = !host || host === 'localhost' || host.startsWith('localhost:') || host.startsWith('127.');
+    if (!isLocal) return `${proto}://${host}`;
+  }
 
-  const publicOrigin =
-    explicit?.replace(/\/$/, '') ??
-    (fwdHost ? `${fwdProto.split(',')[0].trim()}://${fwdHost.split(',')[0].trim()}` : null);
+  return null;
+}
 
+function withPublicOrigin(request: Request): Request {
+  const publicOrigin = getPublicOrigin(request);
   if (!publicOrigin) return request; // local dev — leave untouched
 
   const url = new URL(request.url);
   const currentOrigin = `${url.protocol}//${url.host}`;
   if (currentOrigin === publicOrigin) return request; // already correct
 
-  // Rewrite only the origin; keep path + query intact
   const rewritten = new URL(url.pathname + url.search, publicOrigin);
   return new Request(rewritten.toString(), request);
 }
