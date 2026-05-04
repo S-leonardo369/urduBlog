@@ -1,0 +1,120 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+}
+const { title, description } = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  {description && <meta name="description" content={description} />}
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap"
+    rel="stylesheet"
+  />
+
+  <style is:global>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        oklch(97% 0.010 80);
+      --ink:       oklch(16% 0.010 60);
+      --ink-muted: oklch(48% 0.010 60);
+      --accent:    oklch(56% 0.095 10);
+      --rule:      oklch(84% 0.010 70);
+      --bg-quote:  oklch(94% 0.014 78);
+      --font-urdu: 'Noto Nastaliq Urdu', serif;
+      --font-en:   'EB Garamond', Georgia, serif;
+    }
+
+    [data-theme="dark"] {
+      --bg:        oklch(12% 0.010 60);
+      --ink:       oklch(92% 0.008 70);
+      --ink-muted: oklch(58% 0.008 70);
+      --rule:      oklch(22% 0.010 60);
+      --bg-quote:  oklch(17% 0.012 60);
+    }
+
+    html {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font-urdu);
+      font-size: 19px;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body { min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+
+    /* ── Theme Toggle ── */
+    .theme-toggle {
+      position: fixed;
+      top: 24px;
+      left: 24px;
+      z-index: 100;
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--rule);
+      border-radius: 50%;
+      background: var(--bg);
+      color: var(--ink-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s, color 0.2s, background 0.3s;
+      font-size: 18px;
+      line-height: 1;
+    }
+    .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+    .theme-toggle .icon-sun,
+    .theme-toggle .icon-moon { display: none; }
+    [data-theme="dark"] .theme-toggle .icon-sun  { display: block; }
+    [data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+    html:not([data-theme="dark"]) .theme-toggle .icon-moon { display: block; }
+    html:not([data-theme="dark"]) .theme-toggle .icon-sun  { display: none; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      .container { padding: 0 20px; }
+      .theme-toggle { top: 16px; left: 16px; width: 36px; height: 36px; font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+    <span class="icon-moon">☽</span>
+    <span class="icon-sun">☀</span>
+  </button>
+
+  <slot />
+
+  <script>
+    const toggle = document.getElementById('theme-toggle');
+    const saved = localStorage.getItem('roshnai-theme');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+    toggle?.addEventListener('click', () => {
+      const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('roshnai-theme', next);
+    });
+  </script>
+</body>
+</html>

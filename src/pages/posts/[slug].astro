@@ -1,0 +1,56 @@
+---
+export const prerender = true;
+
+import { getCollection, type CollectionEntry } from 'astro:content';
+import PostLayout from '../../layouts/PostLayout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts');
+  const sorted = posts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+  return sorted.map((post, i) => ({
+    params: { slug: post.slug },
+    props: {
+      post,
+      prevPost: sorted[i + 1] ?? null,
+      nextPost: sorted[i - 1] ?? null,
+    },
+  }));
+}
+
+interface Props {
+  post: CollectionEntry<'posts'>;
+  prevPost: CollectionEntry<'posts'> | null;
+  nextPost: CollectionEntry<'posts'> | null;
+}
+
+const { post, prevPost, nextPost } = Astro.props;
+const { Content } = await post.render();
+
+function estimateReadTime(body: string): string {
+  const toUrduNum = (n: number) =>
+    n.toString().replace(/\d/g, ch => '۰۱۲۳۴۵۶۷۸۹'[+ch]);
+  const words = body.trim().split(/\s+/).length;
+  return `${toUrduNum(Math.max(1, Math.round(words / 150)))} منٹ`;
+}
+
+// Pick first tag as "category", fallback to generic
+const category = post.data.tags?.[0] ?? 'تحریر';
+
+function toNavPost(p: CollectionEntry<'posts'> | null) {
+  if (!p) return null;
+  return { title: p.data.title, date: p.data.date, slug: p.slug };
+}
+---
+
+<PostLayout
+  title={post.data.title}
+  description={post.data.description}
+  category={category}
+  date={post.data.date}
+  readTime={estimateReadTime(post.body)}
+  prevPost={toNavPost(prevPost)}
+  nextPost={toNavPost(nextPost)}
+>
+  <Content />
+</PostLayout>

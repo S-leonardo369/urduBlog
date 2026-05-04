@@ -1,0 +1,150 @@
+---
+interface Props {
+  slug: string;
+  title: string;
+  date: Date;
+  description?: string;
+  readTime?: string;
+  featured?: boolean;
+  animationDelay?: string;
+}
+
+const {
+  slug,
+  title,
+  date,
+  description,
+  readTime = '۵ منٹ',
+  featured = false,
+  animationDelay = '0s',
+} = Astro.props;
+
+function formatUrduDate(d: Date) {
+  const urduMonths = ['جنوری','فروری','مارچ','اپریل','مئی','جون','جولائی','اگست','ستمبر','اکتوبر','نومبر','دسمبر'];
+  const toUrduNum = (n: number) =>
+    n.toString().replace(/\d/g, ch => '۰۱۲۳۴۵۶۷۸۹'[+ch]);
+  return `${toUrduNum(d.getDate())} ${urduMonths[d.getMonth()]} ${toUrduNum(d.getFullYear())}`;
+}
+
+// Approximate reading time from description length as fallback
+const urduReadTime = readTime;
+---
+
+<li class="post-item" style={`animation-delay: ${animationDelay}`}>
+  <a href={`/posts/${slug}`} class="post-item-inner">
+    <div class="post-meta-row">
+      <span class="post-date">{formatUrduDate(date)}</span>
+      <span class="post-dot"></span>
+      <span class="post-read-time">{urduReadTime}</span>
+    </div>
+
+    <h2 class="post-title">
+      {featured && <span class="featured-pill">منتخب</span>}
+      {title}
+    </h2>
+
+    {description && <p class="post-excerpt">{description}</p>}
+
+    <span class="post-cta">
+      پڑھیں <span class="post-cta-arrow">←</span>
+    </span>
+  </a>
+</li>
+
+<style>
+  .post-item {
+    border-bottom: 1px solid var(--rule);
+    padding: 38px 0;
+    animation: fadeUp 0.5s ease both;
+  }
+  .post-item:first-of-type {
+    border-top: 1px solid var(--rule);
+    margin-top: 28px;
+  }
+
+  .post-item-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: transform 0.28s cubic-bezier(.4,0,.2,1);
+    cursor: pointer;
+  }
+  .post-item:hover .post-item-inner {
+    transform: translateX(-7px);
+  }
+
+  .post-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .post-date {
+    font-family: var(--font-urdu);
+    font-size: 0.8rem;
+    color: var(--ink-muted);
+    line-height: 2;
+  }
+  .post-dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--rule);
+    flex-shrink: 0;
+  }
+  .post-read-time {
+    font-family: var(--font-urdu);
+    font-size: 0.78rem;
+    color: var(--accent);
+    line-height: 2;
+  }
+
+  .post-title {
+    font-family: var(--font-urdu);
+    font-size: clamp(1.25rem, 2.6vw, 1.65rem);
+    font-weight: 600;
+    line-height: 1.95;
+    color: var(--ink);
+    transition: color 0.2s;
+  }
+  .post-item:hover .post-title { color: var(--accent); }
+
+  .featured-pill {
+    display: inline-block;
+    font-family: var(--font-en);
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    padding: 1px 6px;
+    vertical-align: middle;
+    margin-left: 10px;
+    opacity: 0.8;
+  }
+
+  .post-excerpt {
+    font-family: var(--font-urdu);
+    font-size: 0.95rem;
+    line-height: 2.5;
+    color: var(--ink-muted);
+  }
+
+  .post-cta {
+    font-family: var(--font-en);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    color: var(--ink-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 2px;
+    transition: color 0.2s, gap 0.2s;
+  }
+  .post-cta-arrow {
+    display: inline-block;
+    transition: transform 0.2s;
+  }
+  .post-item:hover .post-cta { color: var(--accent); gap: 9px; }
+  .post-item:hover .post-cta-arrow { transform: translateX(-3px); }
+</style>

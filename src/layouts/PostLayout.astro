@@ -1,0 +1,239 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  category?: string;
+  date: Date;
+  readTime?: string;
+  author?: string;
+  prevPost?: { title: string; date: Date; slug: string } | null;
+  nextPost?: { title: string; date: Date; slug: string } | null;
+}
+
+const { title, description, category = 'تحریر', date, readTime = '۵ منٹ', author = 'Ahmad Raza', prevPost, nextPost } = Astro.props;
+
+function formatUrduDate(d: Date) {
+  const urduMonths = ['جنوری','فروری','مارچ','اپریل','مئی','جون','جولائی','اگست','ستمبر','اکتوبر','نومبر','دسمبر'];
+  const toUrduNum = (n: number) => n.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d]);
+  return `${toUrduNum(d.getDate())} ${urduMonths[d.getMonth()]} ${toUrduNum(d.getFullYear())}`;
+}
+---
+<BaseLayout title={`${title} — روشنائی`} description={description}>
+  <!-- Progress bar -->
+  <div class="read-progress">
+    <div class="read-progress-fill" id="read-progress-fill"></div>
+  </div>
+
+  <!-- Top bar -->
+  <div class="top-bar">
+    <div class="container">
+      <div class="top-bar-inner">
+        <a href="/" class="back-link">
+          <span class="back-arrow">→</span> تمام تحریریں
+        </a>
+        <a href="/" class="site-wordmark">روشنائی</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Post header -->
+  <header class="post-header">
+    <div class="container">
+      <span class="post-category">{category}</span>
+      <h1 class="post-title">{title}</h1>
+      <div class="post-meta">
+        <span class="post-date">{formatUrduDate(date)}</span>
+        <span class="meta-dot"></span>
+        <span class="post-read-time">{readTime}</span>
+        <span class="meta-dot"></span>
+        <span class="post-author">{author}</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Article body -->
+  <article class="post-body">
+    <div class="container">
+      <slot />
+      <div class="post-end-rule">
+        <span>— ختم شد —</span>
+      </div>
+    </div>
+  </article>
+
+  <!-- Prev / Next nav -->
+  {(prevPost || nextPost) && (
+    <nav class="post-nav">
+      <div class="container">
+        <div class="post-nav-grid">
+          {nextPost ? (
+            <a href={`/posts/${nextPost.slug}`} class="post-nav-item next">
+              <span class="post-nav-label">اگلی تحریر →</span>
+              <span class="post-nav-title">{nextPost.title}</span>
+              <span class="post-nav-date">{formatUrduDate(nextPost.date)}</span>
+            </a>
+          ) : <div class="post-nav-item next empty"></div>}
+          {prevPost ? (
+            <a href={`/posts/${prevPost.slug}`} class="post-nav-item prev">
+              <span class="post-nav-label">← پچھلی تحریر</span>
+              <span class="post-nav-title">{prevPost.title}</span>
+              <span class="post-nav-date">{formatUrduDate(prevPost.date)}</span>
+            </a>
+          ) : <div class="post-nav-item prev empty"></div>}
+        </div>
+      </div>
+    </nav>
+  )}
+</BaseLayout>
+
+<style>
+  /* ── Progress bar ── */
+  .read-progress {
+    position: fixed; top: 0; right: 0; left: 0;
+    height: 2px; background: var(--rule); z-index: 100;
+  }
+  .read-progress-fill {
+    height: 100%; background: var(--accent);
+    width: 0%; transition: width 0.1s linear;
+  }
+
+  /* ── Top bar ── */
+  .top-bar { padding: 28px 0; border-bottom: 1px solid var(--rule); animation: fadeUp 0.5s ease both; }
+  .top-bar-inner { display: flex; align-items: center; justify-content: space-between; }
+
+  .back-link {
+    font-family: var(--font-en); font-size: 0.75rem; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink-muted);
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: color 0.2s, gap 0.2s;
+  }
+  .back-link:hover { color: var(--accent); gap: 10px; }
+  .back-arrow { display: inline-block; transition: transform 0.2s; }
+  .back-link:hover .back-arrow { transform: translateX(3px); }
+
+  .site-wordmark {
+    font-family: var(--font-urdu); font-size: 1.4rem; font-weight: 700;
+    color: var(--ink); line-height: 1.5; transition: color 0.2s;
+  }
+  .site-wordmark:hover { color: var(--accent); }
+
+  /* ── Post header ── */
+  .post-header {
+    padding: 64px 0 44px; border-bottom: 1px solid var(--rule);
+    animation: fadeUp 0.6s 0.1s ease both; opacity: 0; animation-fill-mode: forwards;
+  }
+  .post-category {
+    font-family: var(--font-en); font-size: 0.68rem; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 22px; display: block;
+  }
+  .post-title {
+    font-family: var(--font-urdu); font-size: clamp(1.9rem, 4.5vw, 3rem);
+    font-weight: 700; line-height: 1.75; color: var(--ink); text-wrap: pretty;
+  }
+  .post-meta { display: flex; align-items: center; gap: 16px; margin-top: 28px; }
+  .post-date  { font-family: var(--font-urdu); font-size: 0.85rem; color: var(--ink-muted); line-height: 2; }
+  .meta-dot   { width: 3px; height: 3px; border-radius: 50%; background: var(--rule); flex-shrink: 0; }
+  .post-read-time { font-family: var(--font-urdu); font-size: 0.82rem; color: var(--accent); line-height: 2; }
+  .post-author { font-family: var(--font-en); font-size: 0.78rem; color: var(--ink-muted); letter-spacing: 0.04em; }
+
+  /* ── Article body ── */
+  .post-body {
+    padding: 52px 0 0;
+    animation: fadeUp 0.6s 0.2s ease both; opacity: 0; animation-fill-mode: forwards;
+  }
+  .post-body :global(p) {
+    font-family: var(--font-urdu); font-size: 1rem; line-height: 2.6;
+    color: var(--ink); margin-bottom: 1.8em; text-wrap: pretty;
+  }
+  .post-body :global(h2) {
+    font-family: var(--font-urdu); font-size: clamp(1.2rem, 2.5vw, 1.55rem);
+    font-weight: 600; line-height: 2; color: var(--ink);
+    margin: 2.4em 0 0.8em; padding-bottom: 0.4em; border-bottom: 1px solid var(--rule);
+  }
+  .post-body :global(blockquote) {
+    margin: 2.2em 0; padding: 24px 28px 24px 0;
+    border-right: 3px solid var(--accent);
+    background: var(--bg-quote); border-radius: 0 6px 6px 0;
+  }
+  .post-body :global(blockquote p) {
+    font-size: 1.05rem; line-height: 2.5; margin: 0; padding: 0 20px;
+  }
+  .post-body :global(blockquote p + p) {
+    font-family: var(--font-en); font-size: 0.72rem; letter-spacing: 0.1em;
+    color: var(--ink-muted); margin-top: 10px; font-style: italic;
+  }
+
+  /* Drop cap on first paragraph */
+  .post-body :global(p:first-of-type)::first-letter {
+    font-size: 3.8em; line-height: 0.75; float: right;
+    margin-left: 10px; margin-bottom: 4px; color: var(--accent); font-weight: 700;
+  }
+
+  /* ── End rule ── */
+  .post-end-rule {
+    display: flex; align-items: center; justify-content: center;
+    gap: 12px; margin: 56px 0 0;
+  }
+  .post-end-rule::before, .post-end-rule::after {
+    content: ''; flex: 1; height: 1px; background: var(--rule);
+  }
+  .post-end-rule span {
+    font-family: var(--font-en); font-size: 0.65rem; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--ink-muted); opacity: 0.5;
+  }
+
+  /* ── Post nav ── */
+  .post-nav {
+    padding: 48px 0 80px;
+    animation: fadeUp 0.6s 0.3s ease both; opacity: 0; animation-fill-mode: forwards;
+  }
+  .post-nav-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 1px; background: var(--rule);
+    border: 1px solid var(--rule); border-radius: 8px; overflow: hidden;
+  }
+  .post-nav-item {
+    background: var(--bg); padding: 28px 24px;
+    display: flex; flex-direction: column; gap: 8px;
+    transition: background 0.2s;
+  }
+  .post-nav-item.empty { min-height: 60px; }
+  .post-nav-item:hover { background: var(--bg-quote); }
+  .post-nav-item.next { text-align: right; }
+  .post-nav-item.prev { text-align: left; }
+  .post-nav-label {
+    font-family: var(--font-en); font-size: 0.65rem; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--ink-muted);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .post-nav-item.next .post-nav-label { justify-content: flex-end; }
+  .post-nav-item.prev .post-nav-label { justify-content: flex-start; }
+  .post-nav-title {
+    font-family: var(--font-urdu); font-size: 0.95rem; font-weight: 600;
+    line-height: 2; color: var(--ink); transition: color 0.2s;
+  }
+  .post-nav-item:hover .post-nav-title { color: var(--accent); }
+  .post-nav-date { font-family: var(--font-urdu); font-size: 0.75rem; color: var(--ink-muted); line-height: 2; }
+
+  @media (max-width: 480px) {
+    .post-header { padding: 44px 0 36px; }
+    .post-meta { gap: 12px; flex-wrap: wrap; }
+    .post-nav-grid { grid-template-columns: 1fr; }
+    .post-nav-item.prev { text-align: right; }
+    .post-nav-item.prev .post-nav-label { justify-content: flex-end; }
+  }
+</style>
+
+<script>
+  const fill = document.getElementById('read-progress-fill');
+  if (fill) {
+    window.addEventListener('scroll', () => {
+      const el = document.documentElement;
+      const pct = el.scrollHeight - el.clientHeight > 0
+        ? (el.scrollTop / (el.scrollHeight - el.clientHeight)) * 100 : 0;
+      (fill as HTMLElement).style.width = pct + '%';
+    }, { passive: true });
+  }
+</script>
