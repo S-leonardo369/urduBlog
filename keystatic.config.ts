@@ -2,7 +2,7 @@ import { config, collection, fields } from '@keystatic/core';
 
 // Update these two values to match your GitHub repo before deploying.
 const GITHUB_OWNER = 'S-leonardo369';
-const GITHUB_REPO  = 'urdublog';
+const GITHUB_REPO  = 'urduBlog';
 
 export default config({
   storage: {
