@@ -1,7 +1,7 @@
 ---
 export const prerender = true;
 
-import { getCollection, type CollectionEntry } from 'astro:content';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
 import PostLayout from '../../layouts/PostLayout.astro';
 
 export async function getStaticPaths() {
@@ -9,7 +9,7 @@ export async function getStaticPaths() {
   const sorted = posts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
   return sorted.map((post, i) => ({
-    params: { slug: post.slug },
+    params: { slug: post.id.replace(/\.(md|mdoc)$/, '') },
     props: {
       post,
       prevPost: sorted[i + 1] ?? null,
@@ -25,7 +25,7 @@ interface Props {
 }
 
 const { post, prevPost, nextPost } = Astro.props;
-const { Content } = await post.render();
+const { Content } = await render(post);
 
 function estimateReadTime(body: string): string {
   const toUrduNum = (n: number) =>
@@ -38,7 +38,11 @@ const category = post.data.tags?.[0] ?? 'تحریر';
 
 function toNavPost(p: CollectionEntry<'posts'> | null) {
   if (!p) return null;
-  return { title: p.data.title, date: p.data.date, slug: p.slug };
+  return {
+    title: p.data.title,
+    date: p.data.date,
+    slug: p.id.replace(/\.(md|mdoc)$/, ''),
+  };
 }
 ---
 

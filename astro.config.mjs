@@ -2,11 +2,8 @@ import { defineConfig } from 'astro/config';
 import vercel from '@astrojs/vercel';
 import react from '@astrojs/react';
 import keystatic from '@keystatic/astro';
+import markdoc from '@astrojs/markdoc';
 
-// Wrap the Keystatic integration so it skips injecting its default routes.
-// We provide our own versions of both:
-//   src/pages/keystatic/[...params].astro  — admin UI with RTL Nastaliq CSS
-//   src/pages/api/keystatic/[...params].ts — API with OAuth redirect_uri fix
 const OVERRIDDEN_ROUTES = new Set([
   '/keystatic/[...params]',
   '/api/keystatic/[...params]',
@@ -34,6 +31,7 @@ export default defineConfig({
   output: 'static',
   adapter: vercel(),
   integrations: [
+    markdoc(),
     react(),
     keystaticWithUrduEditor(),
   ],

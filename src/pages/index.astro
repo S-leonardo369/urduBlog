@@ -9,7 +9,6 @@ const allPosts = await getCollection('posts');
 const posts = allPosts
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
-// Reading time: rough estimate — ~150 Urdu words per minute
 function estimateReadTime(body: string): string {
   const toUrduNum = (n: number) =>
     n.toString().replace(/\d/g, ch => '۰۱۲۳۴۵۶۷۸۹'[+ch]);
@@ -20,32 +19,30 @@ function estimateReadTime(body: string): string {
 ---
 
 <BaseLayout title="روشنائی — ایک ذاتی بلاگ" description="سوچوں کا گھر، الفاظ کا سفر">
-  <!-- HEADER -->
   <header class="site-header">
     <div class="container">
       <h1 class="site-name">روشنائی</h1>
       <span class="site-name-en">Roshnai — a personal blog</span>
       <p class="site-tagline">سوچوں کا گھر، الفاظ کا سفر</p>
       <nav class="site-nav">
-        <a href="#">About</a>
-        <a href="#">Archive</a>
-        <a href="#">Contact</a>
+        <a href="/about">About</a>
+        <a href="/archive">Archive</a>
+        <a href="/contact">Contact</a>
       </nav>
     </div>
   </header>
 
-  <!-- POSTS -->
   <main>
     <div class="container">
       <div class="section-label">Latest Posts</div>
       <ul class="post-list">
         {posts.map((post, i) => (
           <PostCard
-            slug={post.slug}
+            slug={post.id.replace(/\.(md|mdoc)$/, '')}
             title={post.data.title}
             date={post.data.date}
             description={post.data.description}
-            readTime={estimateReadTime(post.body)}
+            readTime={estimateReadTime(post.body ?? '')}
             featured={i === 0}
             animationDelay={`${0.1 + i * 0.1}s`}
           />
@@ -54,7 +51,6 @@ function estimateReadTime(body: string): string {
     </div>
   </main>
 
-  <!-- FOOTER -->
   <footer class="site-footer">
     <div class="footer-links">
       <a href="#" class="footer-link">
@@ -69,7 +65,7 @@ function estimateReadTime(body: string): string {
         </svg>
         Instagram
       </a>
-      <a href="#" class="footer-link">
+      <a href="/rss.xml" class="footer-link">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19.01 7.38 20 6.18 20C4.98 20 4 19.01 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1z"/>
         </svg>
@@ -81,7 +77,6 @@ function estimateReadTime(body: string): string {
 </BaseLayout>
 
 <style>
-  /* ── Header ── */
   .site-header {
     padding: 56px 0 44px;
     border-bottom: 1px solid var(--rule);
@@ -125,7 +120,6 @@ function estimateReadTime(body: string): string {
   .site-nav a { transition: color 0.2s; }
   .site-nav a:hover { color: var(--accent); }
 
-  /* ── Section label ── */
   .section-label {
     font-family: var(--font-en);
     font-size: 0.68rem;
@@ -146,10 +140,8 @@ function estimateReadTime(body: string): string {
     background: var(--rule);
   }
 
-  /* ── Post list ── */
   .post-list { list-style: none; margin-top: 0; }
 
-  /* ── Footer ── */
   .site-footer {
     margin-top: 80px;
     padding: 44px 0 60px;
