@@ -18,7 +18,8 @@ export default config({
       label: 'تحریریں',
       slugField: 'title',
       path: 'src/content/posts/*',
-      format: 'yaml',
+      format: { contentField: 'content' },
+      entryLayout: 'content',
       schema: {
         title: fields.slug({
           name: {
@@ -46,9 +47,20 @@ export default config({
           }
         ),
 
-        content: fields.text({
+        cover: fields.image({
+          label: 'تصویر',
+          directory: 'public/images/posts',
+          publicPath: '/images/posts/',
+        }),
+
+        content: fields.markdoc({
           label: 'تحریر',
-          multiline: true,
+          options: {
+            image: {
+              directory: 'public/images/posts',
+              publicPath: '/images/posts/',
+            },
+          },
         }),
       },
     }),
